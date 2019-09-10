@@ -27,20 +27,40 @@ curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.2.5 sh -
 kubectl apply -f istio-1.2.5/install/kubernetes/helm/helm-service-account.yaml
 helm init --service-account tiller
 helm install istio-1.2.5/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system
-helm install istio-1.2.5/install/kubernetes/helm/istio --name istio --namespace istio-system
+helm install istio-1.2.5/install/kubernetes/helm/istio --name istio --namespace istio-system \
+  --values istio-1.2.5/install/kubernetes/helm/istio/values-istio-demo.yaml
 kubectl label namespace default istio-injection=enabled
 ```
 
 # Deploy Services
 
 ```
-kubectl apply -f users/deployment.yaml
-kubectl apply -f accounts/deployment.yaml
+kubectl apply -f k8s/
 ```
 
 # Accessing Services
 
+Through Proxy:
 ```
-minikube service users-service
-minikube service accounts-service
+minikube service users-service --url
+minikube service accounts-service --url
+```
+
+Through Istio:
+```
+export INGRESS_HOST=$(minikube ip)
+export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
+echo http://$INGRESS_HOST:$INGRESS_PORT
+```
+
+# Helpful Commands
+
+```
+minikube dashboard
+
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090
+open http://localhost:9090
+
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000
+open http://localhost:3000
 ```
