@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    name: {{ .Release.Name }}
+spec:
+  type: NodePort
+  selector:
+    name: {{ .Release.Name }}-pod
+  ports:
+  - name: http
+    port: {{ .Values.servicePort }}
+    targetPort: {{ .Values.containerPort }}
+    protocol: TCP

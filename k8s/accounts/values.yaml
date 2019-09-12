@@ -1,0 +1,5 @@
+---
+image: microservice_demo_accounts
+replicas: 2
+containerPort: 8080
+servicePort: 80

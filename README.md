@@ -32,10 +32,20 @@ helm install istio-1.2.5/install/kubernetes/helm/istio --name istio --namespace 
 kubectl label namespace default istio-injection=enabled
 ```
 
-# Deploy Services
+# Install Services
 
 ```
-kubectl apply -f k8s/
+helm install k8s/users --name users-service
+helm install k8s/accounts --name accounts-service
+kubectl apply -f k8s/istio/
+```
+
+# Update Services
+
+```
+helm upgrade users-service k8s/users
+helm upgrade accounts-service k8s/accounts
+kubectl apply -f k8s/istio/
 ```
 
 # Accessing Services
