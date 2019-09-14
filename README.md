@@ -16,8 +16,11 @@ eval $(minikube docker-env)
 ## Build Services
 
 ```
-docker build -t microservice_demo_users users
-docker build -t microservice_demo_accounts accounts
+docker build -t k776/users-service:0.0.1 users
+docker push k776/users-service:0.0.1
+
+docker build -t k776/accounts-service:0.0.1 accounts
+docker push k776/accounts-service:0.0.1
 ```
 
 # Install Istio.io
@@ -30,6 +33,13 @@ helm install istio-1.2.5/install/kubernetes/helm/istio-init --name istio-init --
 helm install istio-1.2.5/install/kubernetes/helm/istio --name istio --namespace istio-system \
   --values istio-1.2.5/install/kubernetes/helm/istio/values-istio-demo.yaml
 kubectl label namespace default istio-injection=enabled
+```
+
+# Install Keel
+```
+helm repo add keel-charts https://charts.keel.sh
+helm repo update
+helm upgrade --install keel --namespace=kube-system keel-charts/keel
 ```
 
 # Install Services

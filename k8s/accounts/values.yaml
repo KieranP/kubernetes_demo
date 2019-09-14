@@ -1,5 +1,18 @@
 ---
-image: microservice_demo_accounts
 replicas: 2
-containerPort: 8080
-servicePort: 80
+
+image:
+  name: k776/accounts-service
+  tag: "0.0.1"
+
+service:
+  containerPort: 8080
+  servicePort: 80
+
+keel:
+  policy: minor
+  trigger: poll
+  pollSchedule: "@every 1m"
+  images:
+    - repository: image.name
+      tag: image.tag

@@ -11,6 +11,6 @@ spec:
     name: {{ .Release.Name }}-pod
   ports:
   - name: http
-    port: {{ .Values.servicePort }}
-    targetPort: {{ .Values.containerPort }}
+    port: {{ .Values.service.servicePort }}
+    targetPort: {{ .Values.service.containerPort }}
     protocol: TCP
