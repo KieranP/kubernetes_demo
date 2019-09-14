@@ -1,6 +1,6 @@
-# Microservices Demo
+# Kubernetes Demonstration
 
-The following is a minimally viable microservices demonstration using best practices.
+The following is a Kubernetes stack demo, that integrates Istio, Helm, and Keel on top of minikube on Mac OS.
 
 ## Tooling
 
@@ -10,7 +10,6 @@ brew cask install minikube
 minikube config set memory 8192
 minikube config set cpus 4
 minikube start
-eval $(minikube docker-env)
 ```
 
 ## Build Services
@@ -27,34 +26,28 @@ docker push k776/accounts-service:0.0.1
 
 ```
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.2.5 sh -
-kubectl apply -f istio-1.2.5/install/kubernetes/helm/helm-service-account.yaml
+INSTALL_DIR=istio-$ISTIO_VERSION/install/kubernetes/helm
+kubectl apply -f $INSTALL_DIR/helm-service-account.yaml
 helm init --service-account tiller
-helm install istio-1.2.5/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system
-helm install istio-1.2.5/install/kubernetes/helm/istio --name istio --namespace istio-system \
-  --values istio-1.2.5/install/kubernetes/helm/istio/values-istio-demo.yaml
+helm install $INSTALL_DIR/istio-init --name istio-init --namespace istio-system
+helm install $INSTALL_DIR/istio --name istio --namespace istio-system \
+  --values $INSTALL_DIR/istio/values-istio-demo.yaml
 kubectl label namespace default istio-injection=enabled
 ```
 
 # Install Keel
+
 ```
 helm repo add keel-charts https://charts.keel.sh
 helm repo update
 helm upgrade --install keel --namespace=kube-system keel-charts/keel
 ```
 
-# Install Services
+# Install/Update Services
 
 ```
-helm install k8s/users --name users-service
-helm install k8s/accounts --name accounts-service
-kubectl apply -f k8s/istio/
-```
-
-# Update Services
-
-```
-helm upgrade users-service k8s/users
-helm upgrade accounts-service k8s/accounts
+helm upgrade --install users-service k8s/users
+helm upgrade --install accounts-service k8s/accounts
 kubectl apply -f k8s/istio/
 ```
 
