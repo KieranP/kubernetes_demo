@@ -6,6 +6,9 @@ metadata:
   labels:
     chart: {{ .Release.Name }}
     name: {{ .Release.Name }}-deployment
+  annotations:
+    # Following forces helm to update resource
+    date/deploy-date: {{ now | quote }}
 spec:
   replicas: {{ .Values.replicas }}
   selector:
@@ -15,10 +18,18 @@ spec:
     metadata:
       labels:
         name: {{ .Release.Name }}-pod
+      annotations:
+        # Following forces helm to update resource
+        date/deploy-date: {{ now | quote }}
     spec:
       containers:
       - name: {{ .Release.Name }}
         image: {{ .Values.image.name }}:{{ .Values.image.tag }}
-        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: {{ .Values.service.containerPort }}
+        readinessProbe:
+          initialDelaySeconds: 1
+          periodSeconds: 1
+          httpGet:
+            path: /health
+            port: {{ .Values.service.containerPort }}

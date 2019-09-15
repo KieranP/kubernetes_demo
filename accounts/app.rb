@@ -14,4 +14,8 @@ class Application < Sinatra::Base
   get %r{/user/(\d+)} do |user_id|
     json Account.find_by_user_id(user_id)
   end
+
+  get '/health' do
+    halt 204
+  end
 end

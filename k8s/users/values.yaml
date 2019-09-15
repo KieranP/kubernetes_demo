@@ -3,14 +3,14 @@ replicas: 2
 
 image:
   name: k776/users-service
-  tag: "0.0.1"
+  tag: latest
 
 service:
   containerPort: 8080
   servicePort: 80
 
 keel:
-  policy: minor
+  policy: force
   trigger: poll
   pollSchedule: "@every 1m"
   images:

@@ -10,4 +10,8 @@ class Application < Sinatra::Base
   get %r{/(\d+)} do |id|
     json User.find(id)
   end
+
+  get '/health' do
+    halt 204
+  end
 end

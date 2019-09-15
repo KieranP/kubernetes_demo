@@ -15,11 +15,11 @@ minikube start
 ## Build Services
 
 ```
-docker build -t k776/users-service:0.0.1 users
-docker push k776/users-service:0.0.1
+docker build -t k776/users-service:latest users
+docker push k776/users-service:latest
 
-docker build -t k776/accounts-service:0.0.1 accounts
-docker push k776/accounts-service:0.0.1
+docker build -t k776/accounts-service:latest accounts
+docker push k776/accounts-service:latest
 ```
 
 # Install Istio.io
@@ -46,8 +46,8 @@ helm upgrade --install keel --namespace=kube-system keel-charts/keel
 # Install/Update Services
 
 ```
-helm upgrade --install users-service k8s/users
-helm upgrade --install accounts-service k8s/accounts
+helm upgrade -i users-service k8s/users
+helm upgrade -i accounts-service k8s/accounts
 kubectl apply -f k8s/istio/
 ```
 
