@@ -1,0 +1,20 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: sensu-system
+  name: sensu-go
+spec:
+  rules:
+  - host: sensu.local
+    http:
+      paths:
+      - backend:
+          serviceName: sensu-backend
+          servicePort: 8080
+  - host: webui.sensu.local
+    http:
+      paths:
+      - backend:
+          serviceName: sensu-backend
+          servicePort: 3000

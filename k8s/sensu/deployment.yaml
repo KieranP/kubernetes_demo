@@ -1,0 +1,28 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: sensu-system
+  name: sensu-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensu-backend
+  template:
+    metadata:
+      name: sensu-backend
+      labels:
+        app: sensu-backend
+    spec:
+      containers:
+        - name: sensu-backend
+          image: sensu/sensu:latest
+          command: ["/opt/sensu/bin/sensu-backend", "start", "--log-level", "debug"]
+          ports:
+            - protocol: TCP
+              containerPort: 8080
+            - protocol: TCP
+              containerPort: 8081
+            - protocol: TCP
+              containerPort: 3000

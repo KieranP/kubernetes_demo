@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  namespace: sensu-system
+  name: sensu-agent
+  labels:
+    name: sensu-agent
+spec:
+  selector:
+    matchLabels:
+      name: sensu-agent
+  template:
+    metadata:
+      labels:
+        name: sensu-agent
+    spec:
+      hostPID: true
+      hostIPC: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: sensu-agent
+        image: sensu/sensu:latest
+        command: ["/opt/sensu/bin/sensu-agent", "start", "--log-level=debug"]
+        env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: SENSU_ID
+          value: "kube-node-$(HOST_IP)"
+        - name: SENSU_BACKEND_URL
+          value: ws://sensu-backend.sensu-system.svc.cluster.local:8081
+        - name: SENSU_NAMESPACE
+          value: default
+        - name: SENSU_SUBSCRIPTIONS
+          value: nodes
+        - name: SENSU_DEREGISTER
+          value: "true"
+        - name: SENSU_STATSD_EVENT_HANDLERS
+          value: statsd
+        ports:
+        - containerPort: 3030
+          hostPort: 3030
+          protocol: TCP

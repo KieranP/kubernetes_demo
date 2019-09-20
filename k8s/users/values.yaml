@@ -1,5 +1,5 @@
 ---
-replicas: 2
+replicas: 1
 
 image:
   name: k776/users-service
@@ -8,6 +8,10 @@ image:
 service:
   containerPort: 8080
   servicePort: 80
+
+autoscaler:
+  minReplicas: 1
+  maxReplicas: 10
 
 keel:
   policy: force

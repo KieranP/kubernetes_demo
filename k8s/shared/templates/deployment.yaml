@@ -33,3 +33,17 @@ spec:
           httpGet:
             path: /health
             port: {{ .Values.service.containerPort }}
+      - name: sensu-agent
+        image: sensu/sensu:latest
+        command: ["/opt/sensu/bin/sensu-agent", "start", "--log-level=debug"]
+        env:
+        - name: SENSU_BACKEND_URL
+          value: ws://sensu-backend.sensu-system.svc.cluster.local:8081
+        - name: SENSU_NAMESPACE
+          value: default
+        - name: SENSU_SUBSCRIPTIONS
+          value: pods
+        - name: SENSU_DEREGISTER
+          value: "true"
+        - name: SENSU_STATSD_EVENT_HANDLERS
+          value: statsd
