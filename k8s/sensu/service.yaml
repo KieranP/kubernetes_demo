@@ -5,6 +5,7 @@ metadata:
   namespace: sensu-system
   name: sensu-backend
 spec:
+  type: ClusterIP
   selector:
     app: sensu-backend
   ports:

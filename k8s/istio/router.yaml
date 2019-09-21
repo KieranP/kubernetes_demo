@@ -1,0 +1,33 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: istio-router-users-api
+spec:
+  gateways:
+  - istio-gateway
+  hosts:
+  - "users.svc"
+  http:
+  - route:
+    - destination:
+        host: users-service
+        port:
+          number: 80
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: istio-router-accounts-api
+spec:
+  gateways:
+  - istio-gateway
+  hosts:
+  - "accounts.svc"
+  http:
+  - route:
+    - destination:
+        host: accounts-service
+        port:
+          number: 80

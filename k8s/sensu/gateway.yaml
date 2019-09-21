@@ -1,0 +1,17 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  namespace: sensu-system
+  name: istio-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "api.sensu"
+    - "ui.sensu"
+    port:
+      name: http
+      protocol: HTTP
+      number: 80

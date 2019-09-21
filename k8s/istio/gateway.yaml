@@ -1,0 +1,16 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "users.svc"
+    - "accounts.svc"
+    port:
+      name: http
+      protocol: HTTP
+      number: 80

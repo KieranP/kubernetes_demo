@@ -1,0 +1,35 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: sensu-system
+  name: istio-router-sensu-api
+spec:
+  gateways:
+  - istio-gateway
+  hosts:
+  - "api.sensu"
+  http:
+  - route:
+    - destination:
+        host: sensu-backend
+        port:
+          number: 8080
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: sensu-system
+  name: istio-router-sensu-ui
+spec:
+  gateways:
+  - istio-gateway
+  hosts:
+  - "ui.sensu"
+  http:
+  - route:
+    - destination:
+        host: sensu-backend
+        port:
+          number: 3000
