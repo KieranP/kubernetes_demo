@@ -1,11 +1,16 @@
 # Kubernetes Demonstration
 
-The following is a [Kubernetes](https://kubernetes.io/) stack demo, that integrates [Istio](https://istio.io/), [Helm](https://helm.sh/), [Keel](https://keel.sh/), and [Sensu](https://sensu.io) on top of [minikube](https://minikube.sigs.k8s.io/) on Mac OS.
+The following is a [Kubernetes](https://kubernetes.io/) stack demo, that integrates [Istio](https://istio.io/), [Helm](https://helm.sh/), [Keel](https://keel.sh/), [Kubeapps](https://kubeapps.com) and [Sensu](https://sensu.io) on top of [minikube](https://minikube.sigs.k8s.io/) on Mac OS.
 
 ## Install Tooling
 
 ```bash
 brew install kubernetes-cli kubernetes-helm kubectx
+```
+
+## Install Minikube
+
+```bash
 brew cask install minikube
 minikube config set vm-driver virtualbox
 minikube config set memory 8192
@@ -14,26 +19,44 @@ minikube start --extra-config=kubelet.authentication-token-webhook=true
 minikube tunnel &
 ```
 
-## Install hosts
+## Install Tiller
 
 ```bash
-export INGRESS_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-sudo -- sh -c "echo '$INGRESS_IP users.svc accounts.svc' >> /etc/hosts"
-sudo -- sh -c "echo '$INGRESS_IP api.sensu ui.sensu' >> /etc/hosts"
+kubectl create serviceaccount tiller --namespace kube-system
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount kube-system:tiller
+helm init --override spec.selector.matchLabels.'name'='tiller',spec.selector.matchLabels.'app'='helm' --output yaml | \
+  sed 's@apiVersion: extensions/v1beta1@apiVersion: apps/v1@' | \
+  kubectl apply -f -
 ```
 
 ## Install Istio.io
 
 ```bash
-ISTIO_VERSION=1.3.0
+ISTIO_VERSION=1.3.1
 curl -L https://git.io/getLatestIstio | sh -
 INSTALL_DIR=istio-$ISTIO_VERSION/install/kubernetes/helm
-kubectl apply -f $INSTALL_DIR/helm-service-account.yaml
-kubectl apply -f k8s/tiller/
 helm upgrade -i istio-init $INSTALL_DIR/istio-init --namespace istio-system
 helm upgrade -i istio $INSTALL_DIR/istio --namespace istio-system \
   --values $INSTALL_DIR/istio/values-istio-demo.yaml
 kubectl label namespace default istio-injection=enabled
+```
+
+## Install Istio-HPA
+
+```bash
+git clone https://github.com/stefanprodan/istio-hpa
+kubectl apply -f istio-hpa/kube-metrics-adapter/
+```
+
+## Install Kubeapps
+
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+kubectl create serviceaccount kubeapps-operator --namespace kubeapps
+kubectl create clusterrolebinding kubeapps-operator --clusterrole cluster-admin \
+  --serviceaccount kubeapps:kubeapps-operator --serviceaccount default:kubeapps-operator
+helm upgrade -i kubeapps bitnami/kubeapps --namespace kubeapps
 ```
 
 ## Install metrics-server
@@ -48,7 +71,15 @@ helm upgrade -i metrics-server stable/metrics-server --namespace kube-system \
 ```bash
 helm repo add keel-charts https://charts.keel.sh
 helm repo update
-helm upgrade -i keel keel-charts/keel --namespace=kube-system
+helm upgrade -i keel keel-charts/keel --namespace kube-system
+```
+
+## Install hosts
+
+```bash
+export INGRESS_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+sudo -- sh -c "echo '$INGRESS_IP users.svc accounts.svc' >> /etc/hosts"
+sudo -- sh -c "echo '$INGRESS_IP api.sensu ui.sensu' >> /etc/hosts"
 ```
 
 ## Install Sensu

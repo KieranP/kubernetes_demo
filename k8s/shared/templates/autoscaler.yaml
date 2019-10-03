@@ -3,6 +3,25 @@ apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ .Release.Name }}-autoscaler
+  annotations:
+    metric-config.object.istio-requests-total.prometheus/per-replica: "true"
+    metric-config.object.istio-requests-total.prometheus/query: |
+      sum(
+        rate(
+          istio_requests_total{
+            destination_workload_namespace="default",
+            destination_workload="{{ .Release.Name }}-pod"
+          }[1m]
+        )
+      ) /
+      count(
+        count(
+          container_memory_usage_bytes{
+            namespace="default",
+            pod_name=~"{{ .Release.Name }}-pod.*"
+          }
+        ) by (pod_name)
+      )
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -11,9 +30,14 @@ spec:
   minReplicas: {{ .Values.autoscaler.minReplicas }}
   maxReplicas: {{ .Values.autoscaler.maxReplicas }}
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
+  - type: Object
+    object:
+      metric:
+        name: istio-requests-total
+      describedObject:
+        apiVersion: v1
+        kind: Pod
+        name: {{ .Release.Name }}-pod
       target:
-        type: Utilization
-        averageUtilization: 50
+        type: Value
+        value: 10
